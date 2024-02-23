@@ -1,16 +1,18 @@
 #!/bin/bash
 
-set -x
+FILEPATH=$1
+SSH_PUBKEY=$2
 
 source cluster.sh
 
-FILEPATH=$1
-SSH_PUBKEY=$2
+eval `ssh-agent`
+
+ssh-add $SSH_PUBKEY
 
 mkdir -p $FILEPATH
 
 for server in H1 H2 H3; do
-  scp -i $SSH_PUBKEY Cjen1@${!server}:etcd-test/pcap.pcap $FILEPATH/$server.pcap
+  scp Cjen1@${!server}:etcd-test/pcap.pcap $FILEPATH/$server.pcap
 done
 
-scp -i $SSH_PUBKEY Cjen1@$H4:etcd-test/out.csv $FILEPATH/datapoints.csv
+scp Cjen1@$H4:etcd-test/out.csv $FILEPATH/datapoints.csv

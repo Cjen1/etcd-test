@@ -3,7 +3,7 @@
   - `git clone https://github.com/cjen1/etcd-test.git`
   - `cd etcd-test`
 - record latency measurements
-  - `bash pingall.sh`
+  - `bash ./record_perf.sh`
 - start tmux run etcd and tcpdump
   - `bash start-etcd.sh`
   - `bash make-tcpdump.sh`
@@ -11,3 +11,4 @@
   - `bash start-bencher.sh bins/bencher out.csv 60000 1000`
 - get and kill leader 
   - `ETCDCTL_API=3 reckon/systems/etcd/bin/etcdctl endpoint status --cluster`
+  - `killall -9 etcd`

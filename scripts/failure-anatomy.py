@@ -7,11 +7,25 @@ from subprocess import run
 import sys
 import itertools as it
 
-start = 0 #(750 + 1.708513e9)
-xlim = None #(54, 55.5)
+start = 0
+start = 1.708705e9 + 60
+xlim =  (35.5, 37.5)
+
+expected_errors = ['error trying to connect: tcp connect error: Connection refused (os error 111)',
+                   'etcdserver: request timed out',
+                   'etcdserver: request timed out, possibly due to previous leader failure',
+                   'transport error']
+
+valid_ips = set(["128.110.217.60",
+                 "128.105.145.100",
+                 "130.127.133.236",
+    #             "128.110.217.44"
+    # client => we don't want that to appear in the graph
+               ])
 
 def plot_latency(ax, df):
-    #df = df[df['error'] == '']
+    df = df[df['error'].apply(lambda e : not e in expected_errors)]
+    print(df['error'].unique())
     df['submitted'] = df['start_ns'] / 1e9
     df['response'] = df['end_ns'] / 1e9
     df['latency'] = (df['response'] - df['submitted']) * 1e3
@@ -21,14 +35,14 @@ def plot_latency(ax, df):
     sns.histplot(df,
                  x="submitted_n",
                  y="latency",
-                 binwidth=(0.1, 20),
+                 binwidth=(0.1, 10),
                  ax=ax)
 
     ax.set_xlabel("")
     if xlim is not None:
         ax.set_xlim(*xlim)
     ax.set_ylabel("Client Latency (ms)")
-    ax.set_ylim(0,1000)
+    #ax.set_ylim(0,1000)
 
 def plot_bw(bax, bw):
     bw['bw'] = bw['bw'] / 1e6 # Mega
@@ -44,6 +58,8 @@ def plot_bw(bax, bw):
             hosts.add(dir.split(':')[1])
 
     print(hosts)
+
+    hosts.intersection_update(valid_ips)
 
     #sns.lineplot(
     #        data = bw,
@@ -66,7 +82,7 @@ def plot_bw(bax, bw):
             return norm_host_map[d]
         else: 
             return d
-    #hue_order = [f"{h1}:{h2}" for h1,h2 in it.product(hosts, hosts) if h1 < h2]
+    hue_order = [f"{h1}:{h2}" for h1,h2 in it.product(hosts, hosts) if h1 < h2]
 
     inter_host_lh = [
         f"{h1}:{h2}" for h1,h2 in it.product(hosts, hosts) if h1 < h2
@@ -92,7 +108,7 @@ def plot_bw(bax, bw):
             x = "time",
             y = "bw",
             hue = "direction_map",
-    #        hue_order = hue_order,
+            hue_order = hue_order,
             linewidth=1,
             legend=False,
             errorbar=None,
@@ -103,7 +119,7 @@ def plot_bw(bax, bw):
             x = "time",
             y = "bw",
             hue = "direction_map",
-    #        hue_order = hue_order,
+            hue_order = hue_order,
             linewidth=1,
             legend=False,
             errorbar=None,
@@ -122,7 +138,7 @@ with pf.Graph() as graph:
     res = pd.read_csv(result_file, float_precision="high")
     bw = pd.concat([pd.read_csv(f, float_precision="high") for f in pcap_files], ignore_index=True)
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(8,10))
     gs = grid_spec.GridSpec(2, 1, figure=fig)
     gs = grid_spec.GridSpec(2, 1, figure=fig)
     lax = fig.add_subplot(gs[0,0])
