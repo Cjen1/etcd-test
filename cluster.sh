@@ -1,9 +1,9 @@
 #!/bin/bash
 
-H1=ms1130.utah.cloudlab.us
-H2=c220g1-030607.wisc.cloudlab.us
-H3=clnode024.clemson.cloudlab.us
-H4=apt113.apt.emulab.net
+H1=pc530.emulab.net
+H2=amd113.utah.cloudlab.us
+H3=c220g5-111302.wisc.cloudlab.us
+H4=clnode244.clemson.cloudlab.us
 >&2 echo $H1
 >&2 echo $H2
 >&2 echo $H3
